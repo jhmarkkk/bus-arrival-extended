@@ -5,6 +5,7 @@ import {
   View,
   TouchableOpacity,
   ActivityIndicator,
+  FlatList,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 
@@ -56,6 +57,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+      <FlatList />
       <Text style={styles.busText}>{busNumber}</Text>
       <Text style={styles.titleText}>Next bus arrival time:</Text>
 
