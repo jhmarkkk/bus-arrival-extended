@@ -8,13 +8,14 @@ import {
   FlatList,
 } from "react-native";
 import React, { useState, useEffect } from "react";
+import jsonToFlatlist from "./JsonToFlatlist.js";
 
 export default function App() {
   const [Loading, setLoading] = useState(true);
-  const [Arrival, setArrival] = useState("");
+  // Arrival stores a json of arriving buses info for all buses at that stop
+  const [Arrival, setArrival] = useState([]);
   const [Arrival2, setArrival2] = useState("");
   const BUSSTOP_URL = "https://arrivelah2.busrouter.sg/?id=83139";
-  const busNumber = "155";
 
   function refresh() {
     return loadBusStopData();
@@ -33,39 +34,35 @@ export default function App() {
       })
       .then((responseData) => {
         console.log(responseData);
-        const filteredData = responseData.services.filter(
-          (innerObj) => innerObj.no === busNumber
-        )[0];
         console.log(
-          "----------------------DATA FILTERED-----------------------"
+          `Obtained incoming buses data! ${responseData["services"].length} services found`
         );
-        console.log(filteredData);
-        console.log(filteredData.next.time);
-
+        setArrival(jsonToFlatlist(responseData));
+        console.log(Arrival);
         setLoading(false);
 
-        setArrival(filteredData.next.time);
-        setArrival2(filteredData.next2.time);
+        setArrival(responseData);
       });
   }
 
   useEffect(() => {
     loadBusStopData();
-    const apiInterval = setInterval(loadBusStopData, 10000);
+    //change this back to 1mins later
+    const apiInterval = setInterval(loadBusStopData, 1000000);
     return () => clearInterval(apiInterval);
   }, []);
 
   return (
     <View style={styles.container}>
       <FlatList />
-      <Text style={styles.busText}>{busNumber}</Text>
+      <Text style={styles.busText}>155</Text>
       <Text style={styles.titleText}>Next bus arrival time:</Text>
 
       <Text style={styles.arrivalText1}>
         {Loading ? (
           <ActivityIndicator size="large" color="blue" />
         ) : (
-          StringToDatetime(Arrival)
+          "placeholder"
         )}
       </Text>
 
@@ -75,7 +72,7 @@ export default function App() {
         {Loading ? (
           <ActivityIndicator size="large" color="blue" />
         ) : (
-          StringToDatetime(Arrival2)
+          "placeholder 2"
         )}
       </Text>
 
