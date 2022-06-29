@@ -7,21 +7,39 @@ export default function jsonToFlatlist(response_json) {
       // should nexts be a JS object of classes...?
       this.next_buses = [];
       [next, next2, next3].forEach((coming_bus) => {
-        this.next_buses.push(
-          new Bus(
-            coming_bus["time"],
-            coming_bus["duration_ms"],
-            coming_bus["lat"],
-            coming_bus["lng"],
-            coming_bus["load"],
-            coming_bus["feature"],
-            coming_bus["type"],
-            coming_bus["visit_number"],
-            coming_bus["origin_code"],
-            coming_bus["destination_code"]
-          )
-        );
+        // sometimes coming_bus can be a null, so we don't store it
+        if (coming_bus === null) {
+          {
+          }
+        } else {
+          this.next_buses.push(
+            new Bus(
+              coming_bus["time"],
+              coming_bus["duration_ms"],
+              coming_bus["lat"],
+              coming_bus["lng"],
+              coming_bus["load"],
+              coming_bus["feature"],
+              coming_bus["type"],
+              coming_bus["visit_number"],
+              coming_bus["origin_code"],
+              coming_bus["destination_code"]
+            )
+          );
+        }
       });
+    }
+
+    get get_bus_number() {
+      return this.bus_number;
+    }
+
+    get get_operator() {
+      return this.operator;
+    }
+
+    get get_next_buses() {
+      return this.next_buses;
     }
   }
 
@@ -52,19 +70,30 @@ export default function jsonToFlatlist(response_json) {
     get get_duration() {
       return this.duration;
     }
+
+    get get_duration_minute() {
+      return Math.floor(this.duration / 1000 / 60);
+    }
   }
 
   let bus_flatlist_data = [];
   response_json["services"].forEach((service) => {
-    bus_flatlist_data.push(
-      new Bus_Service(
-        service["no"],
-        service["operator"],
-        service["next"],
-        service["next2"],
-        service["next3"]
-      )
-    );
+    try {
+      // see which bus giving problems
+      console.log(service["no"]);
+
+      bus_flatlist_data.push(
+        new Bus_Service(
+          service["no"],
+          service["operator"],
+          service["next"],
+          service["next2"],
+          service["next3"]
+        )
+      );
+    } catch (error) {
+      console.log(error);
+    }
   });
   return bus_flatlist_data;
 }

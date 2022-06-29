@@ -12,7 +12,8 @@ import jsonToFlatlist from "./JsonToFlatlist.js";
 
 export default function App() {
   const [Loading, setLoading] = useState(true);
-  // Arrival stores a json of arriving buses info for all buses at that stop
+  // Arrival stores an array of arriving bus service info for all buses at that stop
+  // Each Bus_Service is a class, with next, next2, etc. is a Bus class
   const [Arrival, setArrival] = useState([]);
   const [Arrival2, setArrival2] = useState("");
   const BUSSTOP_URL = "https://arrivelah2.busrouter.sg/?id=83139";
@@ -37,11 +38,10 @@ export default function App() {
         console.log(
           `Obtained incoming buses data! ${responseData["services"].length} services found`
         );
-        setArrival(jsonToFlatlist(responseData));
-        console.log(Arrival);
+        let response_arr = jsonToFlatlist(responseData);
+        console.log(response_arr);
+        setArrival(response_arr);
         setLoading(false);
-
-        setArrival(responseData);
       });
   }
 
@@ -52,9 +52,56 @@ export default function App() {
     return () => clearInterval(apiInterval);
   }, []);
 
+  function renderBusFlatlist({ item }) {
+    // each item is a Bus_Service
+    // the default is nulls which show "no bus coming" when rendered
+    let result_bus_arr = [null, null, null];
+    let next_buses = item.get_next_buses;
+
+    for (let i = 0; i < next_buses.length; i++) {
+      result_bus_arr[i] = next_buses[i];
+    }
+
+    return (
+      <View style={styles.bus_service_style}>
+        <Text>{item.get_bus_number}</Text>
+
+        {result_bus_arr.map((coming_bus) => {
+          if (coming_bus === null) {
+            return (
+              <View>
+                <Text>{"N/A"}</Text>
+              </View>
+            );
+          } else {
+            let coming_bus_duration = coming_bus.get_duration_minute;
+            if (coming_bus_duration < 0) {
+              var display_message = "Left";
+            } else if (coming_bus_duration === 0) {
+              var display_message = "Arr";
+            } else {
+              var display_message = `${coming_bus_duration} mins`;
+            }
+
+            return (
+              <View>
+                <Text>{display_message}</Text>
+              </View>
+            );
+          }
+        })}
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <FlatList />
+      {/* flatlist data takes in an array of  */}
+      <FlatList
+        data={Arrival}
+        renderItem={renderBusFlatlist}
+        style={styles.flatlist_style}
+      />
       <Text style={styles.busText}>155</Text>
       <Text style={styles.titleText}>Next bus arrival time:</Text>
 
@@ -62,7 +109,7 @@ export default function App() {
         {Loading ? (
           <ActivityIndicator size="large" color="blue" />
         ) : (
-          "placeholder"
+          <Text> {Arrival[0].get_bus_number} </Text>
         )}
       </Text>
 
@@ -127,5 +174,18 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "bold",
     color: "red",
+  },
+
+  flatlist_style: {
+    width: "100%",
+    backgroundColor: "lightblue",
+  },
+
+  bus_service_style: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    backgroundColor: "green",
+    alignSelf: "center",
   },
 });
