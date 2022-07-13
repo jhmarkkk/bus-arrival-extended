@@ -15,7 +15,6 @@ export default function App() {
   // Arrival stores an array of arriving bus service info for all buses at that stop
   // Each Bus_Service is a class, with next, next2, etc. is a Bus class
   const [Arrival, setArrival] = useState([]);
-  const [Arrival2, setArrival2] = useState("");
   const BUSSTOP_URL = "https://arrivelah2.busrouter.sg/?id=83139";
 
   function refresh() {
